@@ -1,7 +1,7 @@
 type Node<T> = {
     value: T,
-    prev: Node<T>,
-    next: Node<T>,
+    prev?: Node<T>,
+    next?: Node<T>,
 }
 
 export default class DoublyLinkedList<T> {
@@ -77,6 +77,7 @@ export default class DoublyLinkedList<T> {
 
         node.prev = this.tail;
         this.tail.next = node;
+        this.tail = node;
     }
 
     remove(item: T): T | undefined {
@@ -99,16 +100,16 @@ export default class DoublyLinkedList<T> {
         if (this.length === 0) {
             const out = this.head?.value;
             this.head = this.tail = undefined;
-            
+
             return out;
         }
 
         if (curr.prev) {
-            curr.prev = curr.next;
+            curr.prev.next = curr.next;
         }
 
         if (curr.next) {
-            curr.next = curr.prev;
+            curr.next.prev = curr.prev;
         }
 
         if (curr === this.head) {
@@ -125,10 +126,58 @@ export default class DoublyLinkedList<T> {
     }
 
     get(idx: number): T | undefined {
+        if (idx < 0 || idx >= this.length) {
+            return undefined;
+        }
 
+        let curr = this.head;
+
+        for (let i = 0; curr && i < idx; i++) {
+            curr = curr.next;
+        }
+
+        return curr?.value;
     }
 
     removeAt(idx: number): T | undefined {
+        // Validar índice
+        if (idx < 0 || idx >= this.length) {
+            return undefined;
+        }
 
+        let curr = this.head;
+
+        // Buscar el nodo en el índice
+        for (let i = 0; curr && i < idx; i++) {
+            curr = curr.next;
+        }
+
+        if (!curr) return undefined;
+
+        // Ajustar head si se elimina el primer nodo
+        if (curr === this.head) {
+            this.head = curr.next;
+        }
+
+        // Ajustar tail si se elimina el último nodo
+        if (curr === this.tail) {
+            this.tail = curr.prev;
+        }
+
+        // Ajustar punteros de los nodos adyacentes
+        if (curr.prev) {
+            curr.prev.next = curr.next;
+        }
+
+        if (curr.next) {
+            curr.next.prev = curr.prev;
+        }
+
+        // Limpiar las referencias del nodo eliminado
+        curr.next = curr.prev = undefined;
+
+        this.length--;
+
+        return curr.value;
     }
 }
